@@ -20,13 +20,13 @@ jobs:
         with:
           path: ~/.npm
           key: ${{runner.os}}-node-${{hashFiles('**/package-lock.json')}}
-      - run: npm test -- --coverage
-        env:
-          CI: true
       - uses: actions/setup-node@v1
         with:
           node-version: "12.x"
       - run: npm ci
+      - run: npm test -- --coverage
+        env:
+          CI: true
       - name: Upload Coverage
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v1
