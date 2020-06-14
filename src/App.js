@@ -9,6 +9,7 @@ function App() {
         <img src={logo} className="App-logo" alt="logo" />
         <p>
           Projeto base para a aula de CI.
+          Testando o deploy automatizado.
         </p>
         <a
           className="App-link"
