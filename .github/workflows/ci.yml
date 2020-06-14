@@ -4,9 +4,11 @@ on:
   pull_request:
     branches: 
       - develop
+      - master
   push:
     branches: 
       - develop
+      - master
 
 jobs:
   build:
@@ -17,10 +19,16 @@ jobs:
         with:
           node-version: "12.x"
       - run: npm ci
+      - name: Cache node_modules
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{runner.os}}-node-${{hashFiles('**/package-lock.json')}}
       - run: npm test -- --coverage
         env:
           CI: true
       - name: Upload Coverage
+        if: github.event_name == 'push'
         uses: actions/upload-artifact@v1
         with:
           name: code_coverage
@@ -29,12 +37,19 @@ jobs:
         if: github.event_name == 'push'
         run: npm run build
       - name: Upload Build
+        if: github.event_name == 'push'
         uses: actions/upload-artifact@v1
         with:
           name: build
           path: build
+      - name: Create Release
+        if: github.event_name == 'push' && github.ref == 'ref/heads/master'
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
       - name: Deploy to Staging
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && github.ref == 'ref/heads/develop'
         run: npx surge --project ./build --domain nippy-self.surge.sh
         env:
           SURGE_LOGIN: ${{secrets.SURGE_LOGIN}}
